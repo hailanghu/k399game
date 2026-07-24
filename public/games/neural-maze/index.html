@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Neural Maze — k399game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #020617;
+      color: #f8fafc;
+      font-family: 'JetBrains Mono', monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      overflow: hidden;
+    }
+    h1 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #22c55e; }
+    .meta { color: #64748b; font-size: 0.75rem; margin-bottom: 1rem; }
+    canvas { border: 1px solid #1e293b; border-radius: 8px; background: #0f172a; }
+    .controls { margin-top: 1rem; display: flex; gap: 1rem; align-items: center; }
+    button {
+      background: #22c55e; color: #020617; border: none; padding: 0.5rem 1rem;
+      border-radius: 6px; font-weight: bold; cursor: pointer;
+    }
+    button:hover { background: #4ade80; }
+    .level { color: #22c55e; font-size: 1.2rem; }
+    .hint { margin-top: 0.5rem; color: #475569; font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <h1>Neural Maze</h1>
+  <div class="meta">100% AI Generated • Arrow keys to move</div>
+  <canvas id="game" width="600" height="400"></canvas>
+  <div class="controls">
+    <div class="level">Level: <span id="level">1</span></div>
+    <button onclick="restart()">New Maze</button>
+  </div>
+  <div class="hint">Reach the cyan portal. Walls shift every few moves.</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+    const cols = 20, rows = 13, cell = 30;
+    canvas.width = cols * cell;
+    canvas.height = rows * cell;
+
+    let maze = [], player = {}, goal = {}, level = 1, moves = 0;
+
+    function generateMaze() {
+      maze = Array(rows).fill().map(() => Array(cols).fill(1));
+      const stack = [];
+      const start = { x: 1, y: 1 };
+      maze[start.y][start.x] = 0;
+      stack.push(start);
+      const dirs = [{ x: 0, y: -2 }, { x: 0, y: 2 }, { x: -2, y: 0 }, { x: 2, y: 0 }];
+      while (stack.length) {
+        const curr = stack[stack.length - 1];
+        const neighbors = dirs
+          .map(d => ({ x: curr.x + d.x, y: curr.y + d.y, dx: d.x / 2, dy: d.y / 2 }))
+          .filter(n => n.x > 0 && n.x < cols && n.y > 0 && n.y < rows && maze[n.y][n.x] === 1);
+        if (neighbors.length) {
+          const next = neighbors[Math.floor(Math.random() * neighbors.length)];
+          maze[next.y][next.x] = 0;
+          maze[curr.y + next.dy][curr.x + next.dx] = 0;
+          stack.push({ x: next.x, y: next.y });
+        } else {
+          stack.pop();
+        }
+      }
+      player = { x: 1, y: 1 };
+      goal = { x: cols - 2, y: rows - 2 };
+    }
+
+    function shiftMaze() {
+      // Add/remove some random walls to simulate "neural" shifting
+      for (let i = 0; i < 8; i++) {
+        const x = Math.floor(Math.random() * (cols - 2)) + 1;
+        const y = Math.floor(Math.random() * (rows - 2)) + 1;
+        if ((x !== player.x || y !== player.y) && (x !== goal.x || y !== goal.y)) {
+          maze[y][x] = maze[y][x] ? 0 : 1;
+        }
+      }
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      for (let y = 0; y < rows; y++) {
+        for (let x = 0; x < cols; x++) {
+          if (maze[y][x]) {
+            ctx.fillStyle = '#1e293b';
+            ctx.fillRect(x * cell, y * cell, cell, cell);
+            ctx.strokeStyle = '#334155';
+            ctx.strokeRect(x * cell, y * cell, cell, cell);
+          }
+        }
+      }
+      ctx.fillStyle = '#22c55e';
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(player.x * cell + 4, player.y * cell + 4, cell - 8, cell - 8);
+      ctx.shadowBlur = 0;
+
+      ctx.fillStyle = '#22d3ee';
+      ctx.shadowColor = '#22d3ee';
+      ctx.shadowBlur = 15;
+      ctx.beginPath();
+      ctx.arc(goal.x * cell + cell / 2, goal.y * cell + cell / 2, cell / 3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    }
+
+    function move(dx, dy) {
+      const nx = player.x + dx, ny = player.y + dy;
+      if (nx >= 0 && nx < cols && ny >= 0 && ny < rows && maze[ny][nx] === 0) {
+        player.x = nx; player.y = ny; moves++;
+        if (moves % 8 === 0) shiftMaze();
+        if (player.x === goal.x && player.y === goal.y) {
+          level++;
+          document.getElementById('level').textContent = level;
+          generateMaze();
+          moves = 0;
+        }
+        draw();
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowUp') move(0, -1);
+      if (e.key === 'ArrowDown') move(0, 1);
+      if (e.key === 'ArrowLeft') move(-1, 0);
+      if (e.key === 'ArrowRight') move(1, 0);
+    });
+
+    function restart() { generateMaze(); moves = 0; level = 1; document.getElementById('level').textContent = level; draw(); }
+    generateMaze(); draw();
+  </script>
+</body>
+</html>

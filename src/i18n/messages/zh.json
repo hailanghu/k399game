@@ -1,0 +1,53 @@
+{
+  "hero": {
+    "title": "每款游戏，100% AI 生成",
+    "subtitle": "精心收集由人工智能完全创造的游戏合集。无人工编码参与，只有纯粹的 AI 创造力。",
+    "cta": "探索游戏",
+    "stats": {
+      "games": "AI 游戏",
+      "models": "AI 模型",
+      "players": "游玩次数"
+    }
+  },
+  "features": {
+    "title": "为什么选择 AI 生成游戏？",
+    "items": [
+      {
+        "title": "100% AI 打造",
+        "desc": "每一个像素、每一行代码、每一种游戏机制——全部由最先进的 AI 模型生成，无需人工干预。"
+      },
+      {
+        "title": "无限创造力",
+        "desc": "AI 不遵循模板。每款游戏都是独一无二的创作，突破互动娱乐的边界。"
+      },
+      {
+        "title": "即点即玩",
+        "desc": "无需下载，无需安装。所有游戏直接在浏览器中运行，点击即可开始。"
+      }
+    ]
+  },
+  "games": {
+    "title": "精选 AI 游戏",
+    "subtitle": "精选展示 AI 创意的最佳游戏",
+    "playNow": "开始游戏",
+    "aiGenerated": "100% AI 生成",
+    "categories": {
+      "all": "全部",
+      "puzzle": "益智",
+      "action": "动作",
+      "strategy": "策略",
+      "arcade": "街机",
+      "adventure": "冒险"
+    }
+  },
+  "nav": {
+    "home": "首页",
+    "games": "游戏",
+    "about": "关于",
+    "submit": "提交游戏"
+  },
+  "footer": {
+    "tagline": "AI 与游戏相遇的地方。平台上的每款游戏均由人工智能生成。",
+    "copyright": "© 2026 k399game. 保留所有权利。"
+  }
+}

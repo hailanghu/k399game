@@ -1,0 +1,17 @@
+name = "k399game"
+compatibility_date = "2024-07-24"
+
+# Cloudflare Pages 部署配置
+# 通过 next-on-pages 适配后部署
+pages_build_output_dir = ".vercel/output/static"
+
+[env.production]
+# 生产环境绑定（后续扩展）
+# [[env.production.r2_buckets]]
+# binding = "GAMES_BUCKET"
+# bucket_name = "k399game-assets"
+#
+# [[env.production.d1_databases]]
+# binding = "DB"
+# database_name = "k399game-db"
+# database_id = ""

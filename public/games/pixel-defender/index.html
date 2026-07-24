@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pixel Defender — k399game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; overflow: hidden; }
+    h1 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #22c55e; }
+    .meta { color: #64748b; font-size: 0.75rem; margin-bottom: 1rem; }
+    canvas { border: 1px solid #1e293b; border-radius: 8px; background: #0f172a; }
+    .controls { margin-top: 1rem; display: flex; gap: 1.5rem; align-items: center; flex-wrap: wrap; justify-content: center; }
+    button { background: #22c55e; color: #020617; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #4ade80; }
+    .stat { color: #22c55e; font-size: 1rem; }
+    .hint { margin-top: 0.5rem; color: #475569; font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <h1>Pixel Defender</h1>
+  <div class="meta">100% AI Generated • Click anywhere to shoot, defend the green base</div>
+  <canvas id="game" width="600" height="400"></canvas>
+  <div class="controls">
+    <div class="stat">Base HP: <span id="hp">100</span></div>
+    <div class="stat">Score: <span id="score">0</span></div>
+    <div class="stat">Wave: <span id="wave">1</span></div>
+    <button onclick="restart()">Restart</button>
+  </div>
+  <div class="hint">Red enemies advance from the right. Click to fire projectiles.</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    let base, enemies, projectiles, particles, score, wave, hp, gameOver, spawnTimer, lastTime;
+
+    function init() {
+      base = { x: 40, y: 200, width: 40, height: 40 };
+      enemies = [];
+      projectiles = [];
+      particles = [];
+      score = 0;
+      wave = 1;
+      hp = 100;
+      gameOver = false;
+      lastTime = performance.now();
+      requestAnimationFrame(loop);
+    }
+
+    function spawnEnemy() {
+      enemies.push({
+        x: canvas.width + 20,
+        y: Math.random() * (canvas.height - 40) + 20,
+        width: 24,
+        height: 24,
+        speed: 0.5 + Math.random() * 0.5 + wave * 0.1,
+        hp: 2 + Math.floor(wave / 2)
+      });
+    }
+
+    function shoot(targetX, targetY) {
+      const angle = Math.atan2(targetY - (base.y + base.height / 2), targetX - (base.x + base.width / 2));
+      projectiles.push({
+        x: base.x + base.width / 2,
+        y: base.y + base.height / 2,
+        vx: Math.cos(angle) * 8,
+        vy: Math.sin(angle) * 8,
+        damage: 1
+      });
+    }
+
+    function update(dt) {
+      if (gameOver) return;
+
+      // Spawn
+      if (Math.random() < 0.015 + wave * 0.003) spawnEnemy();
+      if (score > wave * 200) wave++;
+
+      // Enemies
+      enemies.forEach(e => {
+        e.x -= e.speed;
+        if (e.x < base.x + base.width) {
+          hp -= 10;
+          e.x = -100;
+        }
+      });
+      enemies = enemies.filter(e => e.x > -50 && e.hp > 0);
+
+      // Projectiles
+      projectiles.forEach(p => {
+        p.x += p.vx;
+        p.y += p.vy;
+      });
+      projectiles = projectiles.filter(p => p.x > 0 && p.x < canvas.width && p.y > 0 && p.y < canvas.height);
+
+      // Collisions
+      projectiles.forEach(p => {
+        enemies.forEach(e => {
+          if (p.x > e.x && p.x < e.x + e.width && p.y > e.y && p.y < e.y + e.height) {
+            e.hp -= p.damage;
+            p.hit = true;
+            for (let i = 0; i < 4; i++) {
+              particles.push({ x: p.x, y: p.y, vx: (Math.random() - 0.5) * 5, vy: (Math.random() - 0.5) * 5, life: 0.5, color: '#fbbf24' });
+            }
+            if (e.hp <= 0) {
+              score += 20;
+              for (let i = 0; i < 8; i++) {
+                particles.push({ x: e.x + e.width / 2, y: e.y + e.height / 2, vx: (Math.random() - 0.5) * 6, vy: (Math.random() - 0.5) * 6, life: 0.8, color: '#ef4444' });
+              }
+            }
+          }
+        });
+      });
+      projectiles = projectiles.filter(p => !p.hit);
+
+      // Particles
+      particles.forEach(p => { p.x += p.vx; p.y += p.vy; p.life -= 0.02; });
+      particles = particles.filter(p => p.life > 0);
+
+      if (hp <= 0) gameOver = true;
+
+      document.getElementById('hp').textContent = Math.max(0, hp);
+      document.getElementById('score').textContent = score;
+      document.getElementById('wave').textContent = wave;
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Base
+      ctx.fillStyle = '#22c55e';
+      ctx.shadowColor = '#22c55e'; ctx.shadowBlur = 15;
+      ctx.fillRect(base.x, base.y, base.width, base.height);
+      ctx.shadowBlur = 0;
+
+      // Turret
+      ctx.fillStyle = '#166534';
+      ctx.beginPath();
+      ctx.arc(base.x + base.width / 2, base.y + base.height / 2, 10, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Enemies
+      enemies.forEach(e => {
+        ctx.fillStyle = '#ef4444';
+        ctx.fillRect(e.x, e.y, e.width, e.height);
+        // HP bar
+        ctx.fillStyle = '#334155';
+        ctx.fillRect(e.x, e.y - 6, e.width, 4);
+        ctx.fillStyle = '#22c55e';
+        ctx.fillRect(e.x, e.y - 6, e.width * (e.hp / (2 + Math.floor(wave / 2))), 4);
+      });
+
+      // Projectiles
+      ctx.fillStyle = '#fbbf24';
+      projectiles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+      });
+
+      // Particles
+      particles.forEach(p => {
+        ctx.globalAlpha = p.life;
+        ctx.fillStyle = p.color;
+        ctx.fillRect(p.x, p.y, 3, 3);
+      });
+      ctx.globalAlpha = 1;
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 32px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('BASE DESTROYED', canvas.width / 2, canvas.height / 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '16px monospace';
+        ctx.fillText('Final Score: ' + score, canvas.width / 2, canvas.height / 2 + 30);
+      }
+    }
+
+    function loop(time) {
+      const dt = time - lastTime;
+      lastTime = time;
+      update(dt);
+      draw();
+      requestAnimationFrame(loop);
+    }
+
+    canvas.addEventListener('mousedown', e => {
+      const rect = canvas.getBoundingClientRect();
+      shoot(e.clientX - rect.left, e.clientY - rect.top);
+    });
+
+    canvas.addEventListener('touchstart', e => {
+      e.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const t = e.touches[0];
+      shoot(t.clientX - rect.left, t.clientY - rect.top);
+    });
+
+    function restart() { init(); }
+    init();
+  </script>
+</body>
+</html>

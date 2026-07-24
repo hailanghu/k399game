@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravity Runner — k399game</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #020617; color: #f8fafc; font-family: 'JetBrains Mono', monospace;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      min-height: 100vh; overflow: hidden;
+    }
+    h1 { font-size: 1.2rem; margin-bottom: 0.5rem; color: #22c55e; }
+    .meta { color: #64748b; font-size: 0.75rem; margin-bottom: 1rem; }
+    canvas { border: 1px solid #1e293b; border-radius: 8px; background: #0f172a; }
+    .controls { margin-top: 1rem; display: flex; gap: 1rem; align-items: center; }
+    button { background: #22c55e; color: #020617; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: bold; cursor: pointer; }
+    button:hover { background: #4ade80; }
+    .score { color: #22c55e; font-size: 1.2rem; }
+    .hint { margin-top: 0.5rem; color: #475569; font-size: 0.7rem; }
+  </style>
+</head>
+<body>
+  <h1>Gravity Runner</h1>
+  <div class="meta">100% AI Generated • Click / Space to flip gravity</div>
+  <canvas id="game" width="600" height="400"></canvas>
+  <div class="controls">
+    <div class="score">Score: <span id="score">0</span></div>
+    <button onclick="restart()">Restart</button>
+  </div>
+  <div class="hint">Flip between floor and ceiling to dodge the red barriers.</div>
+
+  <script>
+    const canvas = document.getElementById('game');
+    const ctx = canvas.getContext('2d');
+
+    let player, obstacles, frame, score, gameOver, speed;
+
+    function init() {
+      player = { x: 80, y: 300, radius: 12, onTop: false };
+      obstacles = [];
+      score = 0;
+      frame = 0;
+      gameOver = false;
+      speed = 5;
+      document.getElementById('score').textContent = score;
+      loop();
+    }
+
+    function spawnObstacle() {
+      const gap = 110;
+      const topHeight = Math.random() * (canvas.height - gap - 60) + 30;
+      obstacles.push({ x: canvas.width, topHeight, gap, passed: false });
+    }
+
+    function update() {
+      if (gameOver) return;
+      frame++;
+      score += 0.05;
+      speed = 5 + Math.min(score / 500, 5);
+      document.getElementById('score').textContent = Math.floor(score);
+
+      const targetY = player.onTop ? 40 : canvas.height - 40;
+      player.y += (targetY - player.y) * 0.15;
+
+      if (frame % 90 === 0) spawnObstacle();
+
+      obstacles.forEach(o => {
+        o.x -= speed;
+        if (!o.passed && o.x + 20 < player.x) { o.passed = true; score += 20; }
+      });
+      obstacles = obstacles.filter(o => o.x > -40);
+
+      // Collision
+      obstacles.forEach(o => {
+        if (player.x + player.radius > o.x - 10 && player.x - player.radius < o.x + 10) {
+          if (player.y - player.radius < o.topHeight || player.y + player.radius > o.topHeight + o.gap) {
+            gameOver = true;
+          }
+        }
+      });
+    }
+
+    function draw() {
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // Ceiling and floor
+      ctx.fillStyle = '#1e293b';
+      ctx.fillRect(0, 0, canvas.width, 20);
+      ctx.fillRect(0, canvas.height - 20, canvas.width, 20);
+
+      // Player
+      ctx.fillStyle = '#22c55e';
+      ctx.shadowColor = '#22c55e';
+      ctx.shadowBlur = 12;
+      ctx.beginPath();
+      ctx.arc(player.x, player.y, player.radius, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.shadowBlur = 0;
+
+      // Obstacles
+      ctx.fillStyle = '#ef4444';
+      obstacles.forEach(o => {
+        ctx.fillRect(o.x - 10, 0, 20, o.topHeight);
+        ctx.fillRect(o.x - 10, o.topHeight + o.gap, 20, canvas.height - o.topHeight - o.gap);
+      });
+
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#ef4444';
+        ctx.font = 'bold 32px monospace';
+        ctx.textAlign = 'center';
+        ctx.fillText('GAME OVER', canvas.width / 2, canvas.height / 2);
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = '16px monospace';
+        ctx.fillText('Score: ' + Math.floor(score), canvas.width / 2, canvas.height / 2 + 30);
+      }
+    }
+
+    function loop() {
+      update();
+      draw();
+      if (!gameOver) requestAnimationFrame(loop);
+    }
+
+    function flip() { player.onTop = !player.onTop; }
+    document.addEventListener('keydown', e => { if (e.code === 'Space') flip(); });
+    canvas.addEventListener('mousedown', flip);
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); flip(); });
+    function restart() { init(); }
+
+    init();
+  </script>
+</body>
+</html>
