@@ -13,7 +13,7 @@ export default function HomePage({
       <HeroSection locale={locale} />
       <FeaturesSection />
       <GameGrid locale={locale} />
-      <SubmitSection locale={locale} />
+      <SubmitSection />
     </>
   );
 }

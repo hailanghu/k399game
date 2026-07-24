@@ -1,153 +1,124 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useState } from "react";
 
-export default function Header({ locale }: { locale: string }) {
+export default function Header() {
   const t = useTranslations("nav");
-  const [scrolled, setScrolled] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const pathname = usePathname();
+  const locale = useLocale();
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", onScroll);
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
-
-  const switchLocale = locale === "en" ? "zh" : "en";
+  const nextLocale = locale === "en" ? "zh" : "en";
+  const languageLabel = locale === "en" ? "中文" : "English";
 
   return (
-    <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "glass border-b border-dark-700/50 py-3"
-          : "bg-transparent py-5"
-      }`}
-    >
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between">
-        {/* Logo */}
-        <Link
-          href={`/${locale}`}
-          className="flex items-center gap-2 group"
-        >
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-neon-400 to-neon-600 flex items-center justify-center text-dark-950 font-bold text-sm font-mono">
-            K3
-          </div>
-          <span className="text-xl font-bold tracking-tight">
-            <span className="text-white">k399</span>
-            <span className="text-neon-400">game</span>
-          </span>
-        </Link>
-
-        {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-gray-950/80 backdrop-blur-md border-b border-gray-800">
+      <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <Link
             href={`/${locale}`}
-            className="text-dark-300 hover:text-white transition-colors text-sm font-medium"
+            className="flex items-center gap-2 font-bold text-xl text-white hover:text-green-400 transition-colors"
           >
-            {t("home")}
+            <span className="text-2xl">🎮</span>
+            <span>
+              k399
+              <span className="text-green-400">game</span>
+            </span>
           </Link>
-          <Link
-            href={`/${locale}#games`}
-            className="text-dark-300 hover:text-white transition-colors text-sm font-medium"
-          >
-            {t("games")}
-          </Link>
-          <Link
-            href={`/${locale}#about`}
-            className="text-dark-300 hover:text-white transition-colors text-sm font-medium"
-          >
-            {t("about")}
-          </Link>
-          <Link
-            href={`/${locale}#submit`}
-            className="px-4 py-2 rounded-lg ai-badge text-sm font-medium hover:opacity-80 transition-opacity"
-          >
-            {t("submit")}
-          </Link>
-          <Link
-            href={pathname.replace(`/${locale}`, `/${switchLocale}`)}
-            className="ml-2 px-3 py-1.5 rounded-lg border border-dark-600 text-dark-400 hover:text-white hover:border-dark-400 transition-all text-xs font-mono uppercase"
-          >
-            {switchLocale}
-          </Link>
-        </nav>
 
-        {/* Mobile Toggle */}
-        <button
-          onClick={() => setMobileOpen(!mobileOpen)}
-          className="md:hidden p-2 text-dark-300 hover:text-white"
-        >
-          <svg
-            className="w-6 h-6"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            {mobileOpen ? (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M6 18L18 6M6 6l12 12"
-              />
-            ) : (
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M4 6h16M4 12h16M4 18h16"
-              />
-            )}
-          </svg>
-        </button>
-      </div>
-
-      {/* Mobile Menu */}
-      {mobileOpen && (
-        <div className="md:hidden glass border-t border-dark-700/50 mt-2">
-          <nav className="flex flex-col gap-3 px-4 py-4">
+          {/* Desktop Nav */}
+          <div className="hidden md:flex items-center gap-6">
             <Link
-              href={`/${locale}`}
-              onClick={() => setMobileOpen(false)}
-              className="text-dark-300 hover:text-white transition-colors py-2"
+              href={`/${locale}#hero`}
+              className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               {t("home")}
             </Link>
             <Link
               href={`/${locale}#games`}
-              onClick={() => setMobileOpen(false)}
-              className="text-dark-300 hover:text-white transition-colors py-2"
+              className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               {t("games")}
             </Link>
             <Link
-              href={`/${locale}#about`}
-              onClick={() => setMobileOpen(false)}
-              className="text-dark-300 hover:text-white transition-colors py-2"
+              href={`/${locale}#features`}
+              className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               {t("about")}
             </Link>
             <Link
               href={`/${locale}#submit`}
-              onClick={() => setMobileOpen(false)}
-              className="ai-badge inline-block w-fit px-4 py-2 rounded-lg text-sm"
+              className="text-gray-400 hover:text-white transition-colors text-sm font-medium"
             >
               {t("submit")}
             </Link>
+          </div>
+
+          {/* Right Side */}
+          <div className="flex items-center gap-3">
+            {/* Language Toggle */}
             <Link
-              href={pathname.replace(`/${locale}`, `/${switchLocale}`)}
-              onClick={() => setMobileOpen(false)}
-              className="text-dark-400 hover:text-white transition-colors py-2 text-xs font-mono uppercase"
+              href={`/${nextLocale}`}
+              className="px-3 py-1.5 rounded-lg bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700 text-xs font-medium transition-colors"
             >
-              {switchLocale === "en" ? "English" : "中文"}
+              {languageLabel}
             </Link>
-          </nav>
+
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 text-gray-400 hover:text-white"
+              aria-label="Toggle menu"
+            >
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                {menuOpen ? (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                ) : (
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                )}
+              </svg>
+            </button>
+          </div>
         </div>
-      )}
+
+        {/* Mobile Menu */}
+        {menuOpen && (
+          <div className="md:hidden pb-4 border-t border-gray-800 pt-3">
+            <div className="flex flex-col gap-3">
+              <Link
+                href={`/${locale}#hero`}
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2 py-1"
+              >
+                {t("home")}
+              </Link>
+              <Link
+                href={`/${locale}#games`}
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2 py-1"
+              >
+                {t("games")}
+              </Link>
+              <Link
+                href={`/${locale}#features`}
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2 py-1"
+              >
+                {t("about")}
+              </Link>
+              <Link
+                href={`/${locale}#submit`}
+                onClick={() => setMenuOpen(false)}
+                className="text-gray-400 hover:text-white transition-colors text-sm font-medium px-2 py-1"
+              >
+                {t("submit")}
+              </Link>
+            </div>
+          </div>
+        )}
+      </nav>
     </header>
   );
 }

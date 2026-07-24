@@ -1,85 +1,70 @@
 "use client";
 
 import Link from "next/link";
+import { useTranslations } from "next-intl";
 import type { Game } from "@/data/games";
 
-export default function GameCard({
-  game,
-  locale,
-}: {
-  game: Game;
-  locale: string;
-}) {
-  const title = locale === "zh" ? game.titleZh : game.title;
-  const desc = locale === "zh" ? game.descriptionZh : game.description;
-  const model = locale === "zh" ? game.aiModelZh : game.aiModel;
+const categoryIcons: Record<string, string> = {
+  puzzle: "🧩",
+  action: "🎯",
+  strategy: "♟️",
+  arcade: "🕹️",
+  adventure: "🗺️",
+};
 
-  const categoryGradient: Record<string, string> = {
-    puzzle: "from-purple-500/20 to-purple-600/20",
-    action: "from-red-500/20 to-orange-500/20",
-    strategy: "from-blue-500/20 to-cyan-500/20",
-    arcade: "from-yellow-500/20 to-green-500/20",
-    adventure: "from-pink-500/20 to-rose-500/20",
-  };
+export default function GameCard({ game, locale }: { game: Game; locale: string }) {
+  const t = useTranslations("games");
+  const tc = useTranslations("games.categories");
+
+  const categoryKey = game.category.toLowerCase();
+  const categoryLabel = tc(categoryKey);
 
   return (
     <Link
       href={`/${locale}/games/${game.slug}`}
-      className="group glass rounded-2xl overflow-hidden transition-all duration-300 glass-hover"
+      className="group block bg-gray-900 rounded-2xl overflow-hidden border border-gray-800 hover:border-green-800/50 hover:shadow-lg hover:shadow-green-900/10 transition-all duration-300"
     >
       {/* Thumbnail */}
-      <div
-        className={`relative aspect-video bg-gradient-to-br ${
-          categoryGradient[game.category] || "from-dark-700 to-dark-800"
-        } flex items-center justify-center overflow-hidden`}
-      >
-        <div className="text-6xl opacity-20 group-hover:opacity-30 transition-opacity group-hover:scale-110 duration-500">
-          {game.category === "puzzle" && "🧩"}
-          {game.category === "action" && "⚡"}
-          {game.category === "strategy" && "🏰"}
-          {game.category === "arcade" && "🕹️"}
-          {game.category === "adventure" && "🗺️"}
-        </div>
-
-        {/* Play overlay */}
-        <div className="absolute inset-0 bg-dark-950/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <span className="px-6 py-3 rounded-xl bg-neon-500 text-dark-950 font-bold text-sm transform translate-y-2 group-hover:translate-y-0 transition-transform">
-            {locale === "zh" ? "开始游戏" : "Play Now"}
+      <div className="relative h-48 bg-gray-800 overflow-hidden">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={game.thumbnail || `/thumbnails/${game.slug}.svg`}
+          alt={game.title}
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          loading="lazy"
+        />
+        {/* Hover overlay */}
+        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <span className="px-6 py-3 bg-green-600 text-white rounded-xl font-semibold text-sm hover:bg-green-500 transition-colors shadow-lg">
+            {t("playNow")}
           </span>
         </div>
-
-        {/* AI Badge on thumbnail */}
-        <span className="absolute top-3 left-3 px-2.5 py-1 rounded-full ai-badge text-[10px] font-mono uppercase tracking-wider flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-neon-400 animate-pulse" />
-          AI
-        </span>
+        {/* AI Badge */}
+        <div className="absolute top-3 right-3">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-green-950/80 text-green-400 text-xs font-medium border border-green-800/50 backdrop-blur-sm">
+            {t("aiGenerated")}
+          </span>
+        </div>
       </div>
 
       {/* Info */}
       <div className="p-5">
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-bold text-lg group-hover:text-neon-400 transition-colors line-clamp-1">
-            {title}
+        <div className="flex items-center gap-2 mb-2">
+          <span className="text-2xl">{game.emoji}</span>
+          <h3 className="text-lg font-bold text-white group-hover:text-green-400 transition-colors line-clamp-1">
+            {game.title}
           </h3>
-          {game.featured && (
-            <span className="shrink-0 px-2 py-0.5 rounded text-[10px] font-mono bg-neon-500/10 text-neon-400 border border-neon-500/20">
-              {locale === "zh" ? "精选" : "FEATURED"}
-            </span>
-          )}
         </div>
-        <p className="text-dark-400 text-sm line-clamp-2 mb-4 leading-relaxed">
-          {desc}
+        <p className="text-gray-500 text-sm mb-3 line-clamp-2">
+          {game.description}
         </p>
-
-        {/* Meta */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3 text-xs text-dark-500">
-            <span className="flex items-center gap-1">
-              ⭐ {game.rating}
-            </span>
-            <span>{game.plays.toLocaleString()} plays</span>
-          </div>
-          <span className="text-[11px] text-dark-500 font-mono">{model}</span>
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-800 text-gray-400 text-xs">
+            🤖 {game.aiModel}
+          </span>
+          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-gray-800 text-gray-400 text-xs">
+            {categoryIcons[categoryKey] || "🎮"} {categoryLabel}
+          </span>
         </div>
       </div>
     </Link>

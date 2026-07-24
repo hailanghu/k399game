@@ -1,4 +1,10 @@
 {
+  "nav": {
+    "home": "首页",
+    "games": "游戏",
+    "about": "关于",
+    "submit": "提交游戏"
+  },
   "hero": {
     "title": "每款游戏，100% AI 生成",
     "subtitle": "精心收集由人工智能完全创造的游戏合集。无人工编码参与，只有纯粹的 AI 创造力。",
@@ -40,14 +46,33 @@
       "adventure": "冒险"
     }
   },
-  "nav": {
-    "home": "首页",
-    "games": "游戏",
-    "about": "关于",
-    "submit": "提交游戏"
+  "game": {
+    "back": "← 返回游戏列表",
+    "playNow": "开始游戏",
+    "aboutGame": "关于这款游戏",
+    "aiModel": "AI 模型",
+    "category": "分类",
+    "generatedBy": "由 {model} 生成",
+    "share": "分享",
+    "fullscreen": "全屏"
+  },
+  "submit": {
+    "title": "你有 AI 生成的游戏？",
+    "subtitle": "与世界分享你的创作。我们欢迎所有 100% AI 生成的游戏。",
+    "description": "提交你的 AI 生成游戏，有机会在 k399game 上展示。我们会审核并展示最好的作品。",
+    "cta": "提交你的游戏"
   },
   "footer": {
     "tagline": "AI 与游戏相遇的地方。平台上的每款游戏均由人工智能生成。",
     "copyright": "© 2026 k399game. 保留所有权利。"
+  },
+  "about": {
+    "title": "关于 k399game",
+    "description": "k399game 是首个专注于 100% 人工智能生成游戏的平台。我们相信 AI 能够创造独特、惊喜且充满创意的游戏体验。这里的每款游戏都诞生于提示词——没有任何人类编写过一行游戏代码。",
+    "cta": "开始探索 →",
+    "whatWeDo": "我们做什么",
+    "whatWeDoDesc": "我们从 Claude、GPT-4、Gemini 等前沿模型中发现、整理并展示最优秀的 AI 生成游戏。未来将开放创作者自主提交 AI 生成游戏。",
+    "howItWorks": "工作原理",
+    "howItWorksDesc": "每款游戏通过向 AI 模型发送创意提示生成。AI 编写完整可玩的 HTML5 游戏。我们审核、分类并在平台上发布最佳作品——所有游戏在浏览器中即点即玩。"
   }
 }
