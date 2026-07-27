@@ -7,7 +7,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { password } = body;
 
-    const adminPassword = process.env.ADMIN_PASSWORD || "k399admin";
+    const adminPassword =
+    (globalThis as { ADMIN_PASSWORD?: string }).ADMIN_PASSWORD ||
+    process.env.ADMIN_PASSWORD ||
+    "k399admin";
 
     if (password === adminPassword) {
       return NextResponse.json({

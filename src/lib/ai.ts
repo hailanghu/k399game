@@ -30,12 +30,18 @@ const DEEPSEEK_API_URL = "https://api.deepseek.com/v1/chat/completions";
 const MODEL = "deepseek-chat";
 
 function getApiKey(): string {
-  // Cloudflare env var or Node process.env
-  try {
-    // @ts-expect-error Cloudflare env
-    if (typeof DEEPSEEK_API_KEY !== "undefined") return DEEPSEEK_API_KEY;
-  } catch {}
-  return process.env.DEEPSEEK_API_KEY || "";
+  // Cloudflare Pages Functions inject secrets as global variables.
+  // Also try process.env for local Node.js / Vercel compatibility.
+  const candidates: (string | undefined)[] = [
+    (globalThis as { DEEPSEEK_API_KEY?: string }).DEEPSEEK_API_KEY,
+    process.env.DEEPSEEK_API_KEY,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim().length > 0) {
+      return value.trim();
+    }
+  }
+  return "";
 }
 
 export async function chatCompletion(

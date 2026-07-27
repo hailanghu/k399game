@@ -111,12 +111,15 @@ function saveDevStore() {
 
 // ── Helpers ──────────────────────────────────────────────────────
 function getD1(): D1Database | null {
-  // Cloudflare D1 binding — available as env.DB in production
+  // Cloudflare D1 binding — available as env.DB or process.env.DB in production
   try {
     // @ts-expect-error D1 binding exists in Cloudflare Pages runtime
     if (typeof DB !== "undefined") return DB as D1Database;
   } catch {
     /* dev */
+  }
+  if (typeof process !== "undefined" && process.env.DB) {
+    return process.env.DB as unknown as D1Database;
   }
   return null;
 }

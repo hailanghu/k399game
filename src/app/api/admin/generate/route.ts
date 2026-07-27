@@ -19,7 +19,10 @@ export async function POST(request: Request) {
   try {
     // Auth check
     const auth = request.headers.get("Authorization");
-    const adminPassword = process.env.ADMIN_PASSWORD || "k399admin";
+    const adminPassword = (() => {
+      try { return (globalThis as any).ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || "k399admin"; }
+      catch { return "k399admin"; }
+    })();
     if (auth !== `Bearer ${adminPassword}`) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
