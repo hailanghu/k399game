@@ -1,13 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { games, categories } from "@/data/games";
+import { categories } from "@/data/games";
+import type { Game } from "@/data/games";
 import { useTranslations } from "next-intl";
 import GameCard from "./GameCard";
 
 type TagKey = "all" | "puzzle" | "action" | "strategy" | "arcade" | "adventure";
 
-export default function GameGrid({ locale }: { locale: string }) {
+interface GameGridProps {
+  locale: string;
+  games: Game[];
+}
+
+export default function GameGrid({ locale, games }: GameGridProps) {
   const [activeTag, setActiveTag] = useState<TagKey>("all");
   const t = useTranslations("games");
   const tc = useTranslations("games.categories");

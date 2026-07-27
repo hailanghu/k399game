@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
+export const runtime = "edge";
+
 export const metadata: Metadata = {
   title: "k399game — Every Game, 100% AI Generated",
   description:
