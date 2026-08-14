@@ -45,6 +45,20 @@ export interface CreateGameInput {
   htmlContent: string;
 }
 
+// ── Static game file mapping ────────────────────────────────────
+// Seed games store their static HTML under public/games/<dir>/index.html.
+// The <dir> may differ from the game's slug (e.g. slug "ai-snake-evolution"
+// lives in public/games/snake-evolution/). Build a slug → static URL map.
+const STATIC_GAME_URLS = new Map<string, string>(
+  seedGames
+    .filter((g) => g.gameUrl && g.gameUrl.startsWith("/games/"))
+    .map((g) => [g.slug, g.gameUrl])
+);
+
+export function staticGameUrl(slug: string): string {
+  return STATIC_GAME_URLS.get(slug) || `/games/${slug}/index.html`;
+}
+
 // ── Row → Game mapper ───────────────────────────────────────────
 function rowToGame(row: D1GameRow): Game {
   return {
@@ -61,7 +75,7 @@ function rowToGame(row: D1GameRow): Game {
     gameUrl:
       row.html_content
         ? `/api/games/${row.slug}/play`
-        : `/games/${row.slug}/index.html`,
+        : staticGameUrl(row.slug),
     aiModel: row.ai_model,
     aiModelZh: row.ai_model_zh,
     plays: row.plays,
@@ -125,12 +139,19 @@ function getD1(): D1Database | null {
 }
 
 function generateSlug(title: string): string {
-  return title
+  const base = title
     .toLowerCase()
     .replace(/[^a-z0-9\s-]/g, "")
     .replace(/\s+/g, "-")
     .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
     .slice(0, 60);
+  if (base) return base;
+
+  // Fallback for non-Latin titles (e.g. Chinese) — strip to pinyin-ish
+  // unique id so slug is never empty.
+  const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+  return `game-${id}`;
 }
 
 function generateId(): string {

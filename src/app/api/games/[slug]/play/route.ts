@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getGameHtml } from "@/lib/db";
+import { getGameHtml, staticGameUrl } from "@/lib/db";
 
 export const runtime = "edge";
 
@@ -12,7 +12,7 @@ export async function GET(
     if (!html) {
       // If no HTML in DB, try redirect to static file
       return NextResponse.redirect(
-        new URL(`/games/${params.slug}/index.html`, _request.url)
+        new URL(staticGameUrl(params.slug), _request.url)
       );
     }
 
